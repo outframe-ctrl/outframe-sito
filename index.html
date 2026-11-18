@@ -1478,10 +1478,11 @@ function newsletterHtml() {
   </form>`;
 }
 /* ---------- newsletter (sezione Contatti) ----------
-   Finché "action" è vuoto, chi si iscrive manda una mail all'indirizzo dei Contatti con oggetto "Iscrizione newsletter".
-   Quando avrete un account (MailerLite, Brevo…): copiate qui l'indirizzo "action" del modulo di iscrizione che vi danno
-   e il nome del campo dell'email (MailerLite: 'fields[email]', Brevo: 'EMAIL'); in "privacy" il link all'informativa. */
-const NEWSLETTER = { action: '', campo: 'EMAIL', extra: {}, privacy: '' };
+   Collegata a Brevo: chi si iscrive finisce nella lista "Newsletter sito" (modulo Brevo "Iscrizione dal sito outframe.it",
+   con doppia conferma via email). "action" è il link del modulo (Brevo → Moduli → Condividi); "privacy" è l'informativa.
+   Se "action" fosse vuoto, chi si iscrive manderebbe invece una mail all'indirizzo dei Contatti. */
+const NEWSLETTER = { action: 'https://24c05fcf.sibforms.com/serve/MUIFAJ8h1WgwUzwz3smwKqbIj-ATF2pxNMw7d2j2jHGa2NmPnkYk1EMsyO4bAi03EBz0PdSzOqg0Kcn6k-as83v0uEwaPvf8upU-K0tFsGo243ilNSLc1gYTl3TXkMtDFr8tDki95mO5kN1Vff3cq0phz90LbHExOu86PyzihTxT806RmDRPwMfoD7E9LybetkB64M42JmVA_uJ26g==',
+  campo: 'EMAIL', extra: { email_address_check: '', html_type: 'simple' }, privacy: 'privacy.html' };
 const page = document.getElementById('page');
 let active = 0, projActive = 0;   // sezione e voce della pagina dedicata aperta
 
@@ -1597,7 +1598,8 @@ page.addEventListener('submit', e => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { msg.textContent = t('nlErrMail'); em.focus(); return; }
   if (!ok.checked) { msg.textContent = t('nlErrOk'); ok.focus(); return; }
   if (NEWSLETTER.action) {
-    const fd = new FormData(); fd.append(NEWSLETTER.campo, v); Object.entries(NEWSLETTER.extra || {}).forEach(([k, x]) => fd.append(k, x));
+    // come un normale modulo HTML: campi codificati nell'indirizzo (application/x-www-form-urlencoded), lingua compresa
+    const fd = new URLSearchParams(); fd.append(NEWSLETTER.campo, v); Object.entries(NEWSLETTER.extra || {}).forEach(([k, x]) => fd.append(k, x)); fd.append('locale', LANG);
     msg.textContent = '…';
     fetch(NEWSLETTER.action, { method: 'POST', body: fd, mode: 'no-cors' })
       .then(() => { f.classList.add('fatto'); em.value = ''; ok.checked = false; msg.textContent = t('nlGrazie'); })
