@@ -618,6 +618,19 @@
   #contatti .contacts dd a:hover{background-size:100% 1px;}
   #contatti :focus-visible{outline-color:#fff;}
   @media (max-width:640px){ #contatti{margin:0 -16px; padding:0 16px;} #contatti .psec-pad{padding:36px 0;} }
+  /* schermi grandi: ai lati del riquadro c'è bianco, non nero. Le fasce nere (in alto con IT/EN, in fondo,
+     i contatti e la chiusura dei progetti) restano a tutta larghezza come sugli schermi più piccoli */
+  .frame::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; width:100vw; margin-left:-50vw; background:var(--paper); pointer-events:none;}
+  @media (min-width:1201px){
+    .frame{border-left-color:transparent; border-right-color:transparent;}
+    #contatti{box-shadow:0 0 0 100vmax var(--fondo); clip-path:inset(0 -100vmax);}
+  }
+  @media (min-width:1249px){
+    .panel{overflow-x:hidden;}
+    .panel-inner::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; width:100vw; margin-left:-50vw; background:var(--paper); pointer-events:none;}
+    .panel-inner, .article.pag-artista .panel-inner{border-left-color:transparent; border-right-color:transparent;}
+    .p-fine{box-shadow:0 0 0 100vmax var(--fondo); clip-path:inset(0 -100vmax);}
+  }
   @media (max-width:900px){
     .contact-row{grid-template-columns:minmax(0,1fr);}
 
