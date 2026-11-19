@@ -354,6 +354,10 @@
   .a-bio .t-figs{contain:none; min-height:0; align-self:start; padding-top:10px;}   /* la foto parte all'altezza delle maiuscole della prima riga */
   .a-bio .t-figs figure{height:auto; display:block;}
   .a-bio .t-figs img{flex:none; width:100%; height:auto; max-height:min(80vh, 760px); object-fit:contain; object-position:right top;}
+  /* campo "fotoSottoBio" (es. Antonio Alberti, foto orizzontale): la foto va sotto la biografia, larga quanto il testo, anche sul computer */
+  .a-bio.foto-sotto .t-sec{grid-template-columns:minmax(0,1fr); gap:32px;}
+  .a-bio.foto-sotto .t-figs{padding-top:0; max-width:820px;}
+  .a-bio.foto-sotto .t-figs img{object-position:left top;}
   .article.pag-artista .opere{margin-top:80px;}
   @media (max-width:900px){
     .a-bio .t-sec{grid-template-columns:minmax(0,1fr); gap:32px;}
@@ -527,6 +531,8 @@
   .hcard:hover .hgo{opacity:.6;}
   /* mentre si trascina con il mouse */
   .trascina{scroll-snap-type:none !important; cursor:grabbing;}
+  /* su pc la fila di foto dei progetti scorre libera con due dita sul trackpad, senza scatti */
+  @media (hover:hover) and (pointer:fine){ #artBody.proj-flow.proj-flow .riga.riga.riga.riga{scroll-snap-type:none;} #artBody.proj-flow.proj-flow .riga.riga.riga > figure{scroll-snap-align:none;} }
   .trascina *{cursor:grabbing !important;}
 
   /* opere in fila nella pagina dedicata dell'artista: tutte della stessa altezza */
@@ -564,6 +570,7 @@
   #artBody.proj-flow .t-figs.stack .stack-in.riga, #artBody.proj-flow .t-figs.riga:not(.stack){position:static; height:auto; max-height:none; display:flex; flex-direction:row; flex-wrap:nowrap; align-items:flex-start; gap:14px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; padding-bottom:12px; scrollbar-width:thin; scrollbar-color:var(--line) transparent;}
   #artBody.proj-flow .t-figs.stack:has(.riga){display:block;}
   #artBody.proj-flow .riga.riga > figure{flex:none; margin:0; scroll-snap-align:start;}
+  #artBody.proj-flow .riga.riga > figure > figcaption{width:0; min-width:100%;}   /* la didascalia va a capo dentro la larghezza della foto, senza allargarla */
   @media (max-width:900px){
     #artBody.proj-flow .t-figs .riga.riga.riga > figure > :is(img, video){width:auto; height:220px; max-width:none; max-height:none; object-fit:contain;}
     #artBody.proj-flow .t-figs.stack .stack-in.riga, #artBody.proj-flow .t-figs.riga:not(.stack){gap:10px;}
@@ -592,6 +599,19 @@
   .otrack.curva figcaption{transition:opacity .3s ease;}
   /* pagine dei progetti: foto grande in apertura e scheda con i dati */
   .article-body .art-hero{margin:0;}
+  /* disegno di sfondo di una pagina di progetto (es. il fiore di Art d'Enfer II): fermo mentre si scorre, leggero, dietro testi e foto.
+     Sul telefono si vede intero, ridotto per stare nella larghezza dello schermo */
+  .p-fondo{display:none;}
+  #article[data-fondo] .panel-inner{isolation:isolate;}
+  #article[data-fondo] .p-fondo{display:block; position:sticky; top:0; height:100vh; height:100dvh; margin-bottom:-100vh; margin-bottom:-100dvh; z-index:-1; overflow:hidden; pointer-events:none;}
+  .p-fondo::before{content:""; position:absolute; inset:0; background:var(--fondo-img) no-repeat center / auto 84%; opacity:.08; filter:var(--logo-filtro, none);}
+  @media (max-width:640px){ .p-fondo::before{inset:12% 5%; background-size:contain; opacity:.09;} }
+  /* disegno largo (orizzontale, es. l'ornamento di Art d'Enfer, campo "fondoLargo"): quasi tutta la larghezza; sul telefono si vede intero */
+  #article[data-fondo~="largo"] .p-fondo::before{background-size:min(92%, 1100px) auto;}
+  @media (max-width:640px){ #article[data-fondo~="largo"] .p-fondo::before{left:0; right:0; background-size:94% auto;} }
+  /* disegno a colori (es. il contorno azzurro delle figure di Il Peso del Cielo, campo "fondoColore"): tiene il suo colore anche di notte,
+     un po' meno trasparente perché una linea chiara su bianco si vede meno di una nera */
+  #article[data-fondo~="colore"] .p-fondo::before{opacity:.35; filter:none;}
   .article-body .art-hero img{display:block; width:100%; max-width:none; max-height:none; aspect-ratio:2/1; object-fit:cover; cursor:zoom-in;}
   @media (max-width:640px){ .article-body .art-hero img{aspect-ratio:3/2;} }
   /* progetti: sottotitolo sotto il nome, didascalie, citazione dal testo critico */
@@ -629,6 +649,12 @@
   #artBody.proj-flow .t-figs.giusto figure{flex:var(--g, 100) 1 0; min-width:0; margin:0; height:auto; display:block;}
   #artBody.proj-flow .t-figs.giusto figure :is(img, video){display:block; width:100%; height:auto; aspect-ratio:var(--ar, auto); max-width:none; max-height:none; object-fit:contain;}
   @media (max-width:640px){ #artBody.proj-flow .t-figs.giusto, #artBody.proj-flow .t-figs.giusto .fr{gap:8px;} }
+  /* Art d'Enfer II, Curatela e artisti: la fila di foto sta accanto alla lista dei nomi ("?fila-accanto" nel percorso delle foto);
+     su telefono e schermi stretti la fila resta sotto la lista */
+  @media (min-width:901px){
+    #artBody.proj-flow .t-sec:has(img[src*="fila-accanto"]){grid-template-columns:minmax(190px, 22%) minmax(0, 1fr); gap:40px;}
+    #artBody.proj-flow .t-sec:has(img[src*="fila-accanto"]) .t-text{position:static;}
+  }
   /* una sola foto verticale: accanto al testo (su telefono sotto, a tutta larghezza) */
   @media (min-width:901px){ #artBody.proj-flow .t-sec.lato{grid-template-columns:minmax(0,1fr) minmax(0, 36%); gap:48px;} }
   @media (min-width:901px){ #artBody.proj-flow .t-sec.lato .t-figs.giusto figure :is(img, video){max-height:82vh;} }
@@ -757,6 +783,8 @@
 <div class="panel article" id="article" hidden role="dialog" aria-modal="true" aria-labelledby="artTitle">
   <div class="panel-inner">
     <div class="lang-bar"><button type="button" class="tema-btn" aria-pressed="false"></button><span class="lang-switch"></span></div>
+    <!-- disegno di sfondo di alcune pagine di progetto (campo "fondo"): resta fermo mentre la pagina scorre -->
+    <div class="p-fondo" aria-hidden="true"></div>
     <header>
       <a class="logo logo-mark" href="#" id="artLogo"><img src="img/pittogramma.png?v=3" alt="OUTFRAME — Home"></a>
       <span class="center-label" id="artLabel"></span>
@@ -839,8 +867,9 @@ const SEZIONI = [
         nome: 'Il Peso del Cielo',
         sottotitolo: 'Convergenze e singolarità di due artisti',   // dal manifesto e dal catalogo
         copertina: 'img/peso-testo/allestimento.jpg',   // foto grande in apertura della pagina: l'opera centrale
-        copertinaPos: 'center 5%',
-        copertinaCap: '*Il Peso del Cielo*, 350 × 350 cm',   // didascalia (segnaposto per la tecnica)
+        copertinaPos: 'center 85%',   // inquadratura spostata in basso: si vede tutta la scultura, la parte alta della tela resta un po' fuori
+        copertinaCap: '*Il Peso del Cielo*, 350 × 350 cm',   // didascalia (la tecnica si può aggiungere qui quando c'è)
+        fondo: 'img/peso-del-cielo/fondo.svg', fondoColore: true,   // disegno di sfondo della pagina (il contorno blu della figura di destra della copertina del catalogo), fermo mentre si scorre
         // scheda in apertura: [etichetta, valore]
         scheda: [['Luogo', 'Via Sammartini 23, Milano'], ['Date', '5 – 8 marzo 2026'], ['Artisti', '[Antonio Alberti](#antonio-alberti), [Louis Jacquet](#louis-jacquet)'],
           ['Curatela e produzione', 'Outframe'], ['Pubblico', 'Oltre 700 visitatori'], ['Eventi', 'Drinkello, Don’t Get Me Wrong, Serving the People Milano']],
@@ -1067,6 +1096,7 @@ Lungolinea
       {
         nome: 'Art d’Enfer',
         copertina: 'img/art-denfer-bn/07.jpg?v=2',   // foto grande in apertura della pagina
+        fondo: 'img/art-denfer-bn/fondo.svg', fondoLargo: true,   // disegno di sfondo della pagina (ornamento orizzontale), fermo mentre si scorre
         scheda: [['Luogo', 'Altrove'], ['Spazi', '4 stanze e un’area esterna'], ['Artisti', '20 giovani creativi, selezionati con open call'],
           ['Linguaggi', 'Pittura, fotografia, design, video, performance'], ['Curatela', 'Outframe ed Esplika'], ['Promotore', 'Nuits d’enfer']],
         // "+++" = nuovo blocco dentro lo stesso capitolo (testo e foto propri, senza titolo)
@@ -1306,6 +1336,7 @@ Host venue and partner of the project
         nome: 'Art d’Enfer II',
         sottotitolo: 'Le alchimie del colore',   // dal foglio sala
         copertina: 'img/art-denfer-2/apertura.jpg',   // foto grande in apertura della pagina
+        fondo: 'img/art-denfer-2/fondo.png',   // disegno di sfondo della pagina (il fiore del foglio sala), fermo mentre si scorre
         scheda: [['Luogo', 'Altrove'], ['Spazi', '3 stanze'], ['Artisti', '5 artisti'],
           ['Linguaggi', 'Pittura e proiezione video'], ['Curatela', 'Pietro Alberti ed Emma Corsini'], ['Promotori', 'Outframe e Nuits d’enfer']],
         testo: `
@@ -1323,6 +1354,8 @@ Un progetto costruito attorno al dialogo tra immaginari diversi, generazioni vic
 
 La curatela è di **Pietro Alberti** per Outframe e di **Emma Corsini**. Questa edizione, dedicata alle alchimie del colore, riunisce cinque artisti tra pittura e proiezione video: ricerche diverse, messe in dialogo nello stesso percorso.
 
++++
+
 ### ARTISTI
 
 **[Boselli](https://www.instagram.com/bosellii/)**
@@ -1331,10 +1364,13 @@ La curatela è di **Pietro Alberti** per Outframe e di **Emma Corsini**. Questa 
 **[Victor Öfvergård](https://www.instagram.com/victorofvergard/)**
 **[Cristina de Pedrajuan](https://www.instagram.com/lacristo______xp/)**
 
-![](img/art-denfer-2/05.jpg?fila)
-![](img/art-denfer-2/07.jpg?fila)
-![](img/art-denfer-2/03.jpg?fila)
-![](img/art-denfer-2/08.jpg?fila)
+![Boselli, *La favola* – *Le conseguenze dell’amore*](img/art-denfer-2/artisti-1.jpg?fila-accanto)
+![Boselli, *La favola* – *Le conseguenze dell’amore*](img/art-denfer-2/artisti-2.jpg?fila-accanto)
+![Victor Öfvergård, *Landscape*](img/art-denfer-2/artisti-3.jpg?fila-accanto)
+![Cristina de Pedrajuan, *No se puede patinar Aqui*](img/art-denfer-2/artisti-4.jpg?fila-accanto)
+![Boselli, *San Giorgio uccide il Drago del Contemporaneo*](img/art-denfer-2/artisti-5.jpg?fila-accanto)
+![Martina Licalsi, *Queste parole le hai trovate o te le hanno date?*, *Gli amanti ubriachi di Parma*, *Se mi vedessi nella mia vera statura ti accorgeresti che non sono più alto di così*](img/art-denfer-2/artisti-6.jpg?fila-accanto)
+![Christian Albert, *Equal significance*, *Stranger than fiction*, *Unknown terrain*](img/art-denfer-2/08.jpg?fila-accanto)
 
 ---
 
@@ -1407,6 +1443,8 @@ A project built around the dialogue between different imaginaries, close generat
 
 The exhibition is curated by **Pietro Alberti** for Outframe and by **Emma Corsini**. This edition, dedicated to the alchemies of colour, brings together five artists working across painting and video projection: different practices placed in dialogue along the same route.
 
++++
+
 ### ARTISTS
 
 **[Boselli](https://www.instagram.com/bosellii/)**
@@ -1415,10 +1453,13 @@ The exhibition is curated by **Pietro Alberti** for Outframe and by **Emma Corsi
 **[Victor Öfvergård](https://www.instagram.com/victorofvergard/)**
 **[Cristina de Pedrajuan](https://www.instagram.com/lacristo______xp/)**
 
-![](img/art-denfer-2/05.jpg?fila)
-![](img/art-denfer-2/07.jpg?fila)
-![](img/art-denfer-2/03.jpg?fila)
-![](img/art-denfer-2/08.jpg?fila)
+![Boselli, *La favola* – *Le conseguenze dell’amore*](img/art-denfer-2/artisti-1.jpg?fila-accanto)
+![Boselli, *La favola* – *Le conseguenze dell’amore*](img/art-denfer-2/artisti-2.jpg?fila-accanto)
+![Victor Öfvergård, *Landscape*](img/art-denfer-2/artisti-3.jpg?fila-accanto)
+![Cristina de Pedrajuan, *No se puede patinar Aqui*](img/art-denfer-2/artisti-4.jpg?fila-accanto)
+![Boselli, *San Giorgio uccide il Drago del Contemporaneo*](img/art-denfer-2/artisti-5.jpg?fila-accanto)
+![Martina Licalsi, *Queste parole le hai trovate o te le hanno date?*, *Gli amanti ubriachi di Parma*, *Se mi vedessi nella mia vera statura ti accorgeresti che non sono più alto di così*](img/art-denfer-2/artisti-6.jpg?fila-accanto)
+![Christian Albert, *Equal significance*, *Stranger than fiction*, *Unknown terrain*](img/art-denfer-2/08.jpg?fila-accanto)
 
 ---
 
@@ -1490,6 +1531,7 @@ Host venue and partner of the project
         instagram: '_albertiantonio',
         hero: { src: 'img/antonio-opere/12.jpg?v=2', pos: 'center 45%' },
         origine: 'Trieste, 2003',   // dal catalogo de Il Peso del Cielo
+        fotoSottoBio: true,   // la sua foto (la prima di "foto") sta sotto la biografia invece che accanto
         testo: `
 Antonio Alberti è un artista originario di Trieste, con base a Milano. La sua pratica parte dai miti classici per sovvertirne le identità drammatiche: le figure del mito diventano immagini da alterare e deformare, per esplorare i limiti della loro sopravvivenza formale.
 
@@ -1526,7 +1568,7 @@ With Louis Jacquet he exhibited in [*Il Peso del Cielo*](#il-peso-del-cielo), OU
           { src: 'img/antonio-opere/13.jpg?v=2' },   // titolo e scheda tecnica ancora da avere
           { src: 'img/antonio-opere/14.jpg?v=2', titolo: 'Il Volo del Matto I–II', scheda: { it: ['Tecnica mista, 120 × 180 cm ciascuno'], en: ['Mixed media, 120 × 180 cm each'] } },
         ],
-        foto: ['img/antonio-alberti/09.jpg?v=2', 'img/antonio-opere/01.jpg?v=2', 'img/antonio-opere/02.jpg?v=2', 'img/antonio-opere/03.jpg?v=2', 'img/antonio-opere/04.jpg?v=2', 'img/antonio-opere/05.jpg?v=2', 'img/antonio-opere/06.jpg?v=2', 'img/antonio-opere/07.jpg?v=2', 'img/antonio-opere/08.jpg?v=2', 'img/antonio-opere/09.jpg?v=2', 'img/antonio-opere/10.jpg?v=2', 'img/antonio-opere/11.jpg?v=2', 'img/antonio-opere/12.jpg?v=2', 'img/antonio-opere/13.jpg?v=2', 'img/antonio-opere/14.jpg?v=2', 'img/antonio-alberti/02.jpg?v=2'],
+        foto: ['img/antonio-alberti/ritratto.jpg', 'img/antonio-opere/01.jpg?v=2', 'img/antonio-opere/02.jpg?v=2', 'img/antonio-opere/03.jpg?v=2', 'img/antonio-opere/04.jpg?v=2', 'img/antonio-opere/05.jpg?v=2', 'img/antonio-opere/06.jpg?v=2', 'img/antonio-opere/07.jpg?v=2', 'img/antonio-opere/08.jpg?v=2', 'img/antonio-opere/09.jpg?v=2', 'img/antonio-opere/10.jpg?v=2', 'img/antonio-opere/11.jpg?v=2', 'img/antonio-opere/12.jpg?v=2', 'img/antonio-opere/13.jpg?v=2', 'img/antonio-opere/14.jpg?v=2', 'img/antonio-alberti/02.jpg?v=2'],
       },
       {
         nome: 'Louis Jacquet',
@@ -2323,6 +2365,8 @@ function openArticle(i) {
   const vecchia = document.getElementById('otrack'), stessaVoce = rerendering && !article.hidden && article.dataset.voce === active + ':' + i;
   const sinistraPrima = vecchia && stessaVoce ? vecchia.scrollLeft : null;
   article.dataset.voce = active + ':' + i;
+  if (p.fondo) { article.dataset.fondo = [p.fondoLargo && 'largo', p.fondoColore && 'colore'].filter(Boolean).join(' '); article.style.setProperty('--fondo-img', `url("${p.fondo}")`); }
+  else delete article.dataset.fondo;
   if (!rerendering) bioAperta = false;
   aboutOpen = false; article.classList.remove('slide', 'closing'); document.getElementById('artBody').classList.remove('about-page');
   if (!rerendering) aboutRitorno = document.activeElement;   // dove torna il fuoco quando si chiude
@@ -2348,7 +2392,7 @@ function openArticle(i) {
         <span class="a-tabs-l"><button type="button" data-vai="bio" class="on" aria-current="true">${t('bio')}</button><button type="button" data-vai="opere" aria-current="false">${t('works')}</button></span>
         ${art.length > 1 ? `<span class="a-tabs-r"><a class="int-link a-freccia" href="#${slug(prima.nome)}" aria-label="${t('prevA')}: ${esc(prima.nome)}" title="${esc(prima.nome)}">${FRECCIA_SX}</a><span class="a-sfoglia">${t('sfoglia')}</span><a class="int-link a-freccia" href="#${slug(dopo.nome)}" aria-label="${t('nextA')}: ${esc(dopo.nome)}" title="${esc(dopo.nome)}">${FRECCIA_DX}</a></span>` : ''}
       </nav>
-      <div class="prose a-bio">${sezioneHtml(paras, [`<figure><img src="${p.foto[0]}" alt="${esc(p.nome)}"></figure>`])}</div>
+      <div class="prose a-bio${p.fotoSottoBio ? ' foto-sotto' : ''}">${sezioneHtml(paras, [`<figure><img src="${p.foto[0]}" alt="${esc(p.nome)}"></figure>`])}</div>
       <div class="opere">
         <h4>${t('works')}</h4>
         <div class="otrack curva" id="otrack">${p.opere.map((o, k) => operaHtml(o, k, p.nome)).join('')}</div>
@@ -2471,6 +2515,7 @@ function openAbout() {
   const body = document.getElementById('artBody');
   if (!rerendering) aboutRitorno = document.activeElement;
   aboutOpen = true;
+  delete article.dataset.fondo;
   document.getElementById('artLabel').textContent = '';
   document.getElementById('artBack').textContent = 'Home';
   body.classList.remove('proj-flow'); body.classList.add('about-page'); article.classList.remove('pag-artista', 'su-foto');
@@ -2759,7 +2804,7 @@ window.addEventListener('popstate', () => {
   else if (!article.hidden) closeArticle(true);
 });
 const anyLayer = () => !viewer.hidden || !article.hidden;
-const scrollsSideways = t => { const st = t.closest && t.closest('.htrack, .otrack'); return st && st.scrollWidth > st.clientWidth + 2; };
+const scrollsSideways = t => { const st = t.closest && t.closest('.htrack, .otrack, .riga'); return st && st.scrollWidth > st.clientWidth + 2; };
 // trackpad: due dita verso destra
 let wAcc = 0, wTimer = null, wLock = false;
 window.addEventListener('wheel', e => {
@@ -2858,5 +2903,6 @@ else if (hashSec) {
   }));
 }
 </script>
+
 </body>
 </html>
