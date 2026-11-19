@@ -502,7 +502,7 @@
   .hpic img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; opacity:0; transition:opacity .4s ease, transform .6s var(--ease);}
   .hpic img.on{opacity:1; transition:opacity .5s ease .35s, transform .6s var(--ease);}   /* prima sparisce la vecchia, poi entra la nuova: mai sovrapposte */
   .hpic img.cop{object-fit:cover;}
-  .hcard:hover .hpic img.on{transform:scale(1.02);}
+  @media (hover:hover){ .hcard:hover .hpic img.on{transform:scale(1.02);} }   /* solo con il mouse: sul telefono il "tocco" resterebbe attaccato alla scheda */
   /* la scheda le cui foto iniziano a scorrere (con il mouse quella sotto il cursore, sul telefono quella che si sta guardando)
      si ingrandisce appena, le altre della fila si rimpiccioliscono un poco. Un po' di spazio intorno alla fila (compensato
      dai margini negativi) evita che la scheda ingrandita venga tagliata: l'impaginazione non cambia */
@@ -511,6 +511,13 @@
   .htrack.ha-attiva .hcard{transform:scale(.975);}
   .htrack.ha-attiva .hcard.attiva{transform:scale(1.025);}
   @media (prefers-reduced-motion:reduce){ .hcard{transition:none;} }
+  /* telefono e tablet: si ingrandisce solo la foto della scheda che si sta guardando e le altre restano ferme.
+     Ingrandire le schede intere spostava i punti di aggancio dello scorrimento laterale e faceva scattare la fila */
+  @media (hover:none){
+    .hcard, .htrack.ha-attiva .hcard, .htrack.ha-attiva .hcard.attiva{transform:none; transition:none;}
+    .hpic{transition:transform .5s var(--ease);}
+    .hcard.attiva .hpic{transform:scale(1.03);}
+  }
   .hbars{display:flex; gap:3px; height:2px;}
   .hbars i{flex:1; background:var(--line);}
   .hbars i.done{background:var(--ink);}
@@ -1778,24 +1785,43 @@ if (!window.matchMedia('(hover: none)').matches) {
   page.addEventListener('mouseover', e => { const c = e.target.closest('.hcard'); page.querySelectorAll('.hcard.attiva').forEach(x => { if (x !== c) spegni(x); }); });
   page.addEventListener('mouseleave', () => page.querySelectorAll('.hcard.attiva').forEach(spegni));
 }
-if (!reduceMotion) setInterval(() => {
+const senzaMouse = window.matchMedia('(hover: none)').matches;
+if (!reduceMotion && !senzaMouse) setInterval(() => {
   // con il mouse: scorrono solo le foto della scheda sotto il cursore
+  // (sul telefono no: dopo un tocco il browser lascia la scheda "sotto il dito" e scorrevano le foto sbagliate)
   const hov = page.querySelector('.hcard:hover');
   if (hov) stepCard(hov);
 }, DURATA_FOTO / 2);
-// su telefono e tablet (niente mouse): scorrono le foto delle schede che si vedono sullo schermo
-const schedeVisibili = new Set();
-const schedeIO = window.matchMedia('(hover: none)').matches && 'IntersectionObserver' in window && !reduceMotion
-  ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) schedeVisibili.add(e.target); else { schedeVisibili.delete(e.target); spegni(e.target); } }), { threshold: .6 })
+// su telefono e tablet (niente mouse): scorrono le foto di UNA sola scheda, quella che si sta guardando,
+// cioè quella che si vede quasi tutta e sta più vicina al centro dello schermo
+const schedeVisibili = new Map();   // scheda → quanta se ne vede (0–1)
+const schedeIO = senzaMouse && 'IntersectionObserver' in window && !reduceMotion
+  ? new IntersectionObserver(es => es.forEach(e => {
+      if (e.intersectionRatio >= .6) schedeVisibili.set(e.target, e.intersectionRatio);
+      else { schedeVisibili.delete(e.target); spegni(e.target); }
+    }), { threshold: [0, .6, .8, 1] })
   : null;
 function osservaSchede() {
   if (!schedeIO) return;
   schedeIO.disconnect(); schedeVisibili.clear();
   page.querySelectorAll('.hcard').forEach(c => schedeIO.observe(c));
 }
+function schedaGuardata() {
+  let scelta = null, dMin = Infinity;
+  const cx = innerWidth / 2, cy = innerHeight / 2;
+  schedeVisibili.forEach((r, c) => {
+    if (!c.isConnected) return;
+    const b = c.getBoundingClientRect();
+    const d = Math.hypot(b.left + b.width / 2 - cx, b.top + b.height / 2 - cy);
+    if (d < dMin) { dMin = d; scelta = c; }
+  });
+  return scelta;
+}
 if (schedeIO) setInterval(() => {
   if (document.hidden || !article.hidden) return;
-  schedeVisibili.forEach(c => { if (c.isConnected) stepCard(c); });
+  const c = schedaGuardata();
+  page.querySelectorAll('.hcard.attiva').forEach(x => { if (x !== c) spegni(x); });
+  if (c) stepCard(c);
 }, DURATA_FOTO);
 
 /* clic sulla scheda → pagina dedicata */
