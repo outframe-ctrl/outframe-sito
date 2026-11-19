@@ -17,6 +17,12 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<script>
+  /* giorno / notte: vale la scelta salvata del visitatore, altrimenti come il suo telefono o computer (modalità chiara o scura) */
+  (function () { var t = null; try { t = localStorage.getItem('outframe-tema'); } catch (e) {}
+    if (t !== 'giorno' && t !== 'notte') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'notte' : 'giorno';
+    document.documentElement.dataset.tema = t; })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -24,7 +30,7 @@
 <body>
 <style>
   /* OUTFRAME: copertina con il pittogramma, sezioni una dopo l'altra (Progetti, Artisti, Contatti),
-     pagine dedicate per progetti, artisti e About us. Look carta/inchiostro, uguale in tema chiaro e scuro. */
+     pagine dedicate per progetti, artisti e About us. Look carta/inchiostro di giorno; di notte (pulsante accanto a IT/EN) i colori si invertono. */
   :root{
     --paper:#FFFFFF;
     --ink:#15130F;
@@ -32,10 +38,39 @@
     --line:#D6D3CC;
     --frame:#F3F2EF;   /* fondo dei riquadri foto */
     --fondo:#0d0c0a;   /* il nero intorno al sito, lo stesso dei contatti */
+    --su-fondo:#fff;            /* testo sulle bande (fascia in alto, contatti, chiusura dei progetti) */
+    --su-fondo-2:#A9A59C;       /* etichette sulle bande */
+    --su-fondo-3:#8F8A80;       /* testo spento sulle bande */
+    --su-fondo-4:#C9C4BA;
+    --su-fondo-linea:rgba(255,255,255,.18);
+    --paper-0:rgba(255,255,255,0);   /* il foglio trasparente, per le sfumature */
+    --velo:rgba(10,9,7,.55);
+    --logo-filtro:none;               /* il logo nero sul foglio */
+    --logo-su-fondo:invert(1) brightness(2);   /* il logo sulle bande */
     --mono:'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
     --ease:cubic-bezier(.22,.8,.28,1);
     color-scheme:light;
   }
+  /* NOTTE: il contrario del giorno. Il foglio diventa nero, le bande (in alto, contatti, chiusura dei progetti) diventano bianche */
+  :root[data-tema="notte"]{
+    --paper:#0d0c0a; --ink:#F2EFE8; --grey:#A19C90; --line:#34312B; --frame:#1a1917; --fondo:#FFFFFF;
+    --su-fondo:#0d0c0a; --su-fondo-2:#6F6A5D; --su-fondo-3:#7C776C; --su-fondo-4:#4A463F; --su-fondo-linea:rgba(0,0,0,.16);
+    --paper-0:rgba(13,12,10,0); --velo:rgba(255,255,255,.6); --logo-filtro:invert(1); --logo-su-fondo:none;
+    color-scheme:dark;
+  }
+  /* il pulsante giorno/notte, nella fascia in alto accanto a IT/EN: un cerchio mezzo pieno che gira */
+  .tema-btn{display:inline-grid; place-items:center; width:22px; height:22px; margin-right:18px; color:var(--su-fondo-3); transition:color .2s;}
+  .tema-btn:hover{color:var(--su-fondo);}
+  .tema-btn svg{width:13px; height:13px; display:block; transition:transform .7s var(--ease);}
+  :root[data-tema="notte"] .tema-btn svg{transform:rotate(180deg);}
+  .tema-btn:focus-visible{outline:1px dashed var(--su-fondo); outline-offset:3px;}
+  /* il passaggio dal giorno alla notte: i colori scorrono per poco più di mezzo secondo */
+  .tema-shift, .tema-shift *, .tema-shift *::before, .tema-shift *::after{transition:background-color .6s ease, color .6s ease, border-color .6s ease, box-shadow .6s ease, filter .6s ease, stroke .6s ease, fill .6s ease !important;}
+  .tema-shift .tema-btn svg{transition:transform .7s var(--ease) !important;}
+  /* loghi e pittogramma: neri di giorno, bianchi di notte */
+  .logo-mark img, .cover-foot img{filter:var(--logo-filtro);}
+  .cover-mark svg rect{stroke:var(--ink);}
+  .cover-mark svg line{stroke:var(--paper);}
   *{box-sizing:border-box; margin:0; padding:0;}
   html, body{height:100%; overscroll-behavior-x:none;}
   body{
@@ -77,7 +112,7 @@
   /* pagina dedicata (progetti, artisti, About us), sopra il sito */
   .panel{
     position:fixed; inset:0; z-index:5; display:flex; justify-content:center; align-items:flex-start;
-    padding:24px; overflow-y:auto; background:rgba(10,9,7,.55);
+    padding:24px; overflow-y:auto; background:var(--velo);
   }
   .panel[hidden]{display:none;}
   .panel-inner{
@@ -267,7 +302,7 @@
   /* ===== pagina unica ===== */
   .top{position:sticky; top:0; z-index:4; background:var(--paper); display:flex; justify-content:space-between; align-items:center; gap:24px; border-bottom:none;}
   /* IT / EN in alto a destra, sulla fascia scura sopra il riquadro del sito (niente striscia in più) */
-  .lang-bar{position:absolute; left:0; right:0; bottom:calc(100% + 1px); height:24px; display:flex; justify-content:flex-end; align-items:center; padding:0 28px; color:#fff;}
+  .lang-bar{position:absolute; left:0; right:0; bottom:calc(100% + 1px); height:24px; display:flex; justify-content:flex-end; align-items:center; padding:0 28px; color:var(--su-fondo);}
   .panel-inner{position:relative;}
   /* pagine di progetti, artisti e About us: la riga con logo e il tasto per tornare indietro resta in alto mentre si scorre, come nella home */
   .panel-inner > header{position:sticky; top:-24px; z-index:4; background:var(--paper);}   /* -24px: la fascia scura sopra sale via e la riga si ferma in cima */
@@ -343,9 +378,9 @@
   .article.pag-artista .panel-inner > header::after{content:''; position:absolute; left:28px; right:28px; bottom:0; border-bottom:1px solid var(--line);}
   @media (max-width:640px){ .article.pag-artista .panel-inner > header::after{left:16px; right:16px;} }
   .frame > .lang-bar{height:28px;}   /* pagina principale: la fascia in alto è mezzo cm più alta */
-  .lang-bar .lang-switch button{color:#8F8A80;}
-  .lang-bar .lang-switch button[aria-pressed="true"]{color:#fff;}
-  .lang-bar .lang-switch button:hover{color:#fff;}
+  .lang-bar .lang-switch button{color:var(--su-fondo-3);}
+  .lang-bar .lang-switch button[aria-pressed="true"]{color:var(--su-fondo);}
+  .lang-bar .lang-switch button:hover{color:var(--su-fondo);}
   #page{display:block; padding:0 28px;}
   /* ===== copertina ===== */
   .cover{--cover-h:560px; --title-size:clamp(34px, min(4.9vw, calc(var(--cover-h) * .14)), 66px); position:relative; height:var(--cover-h); box-sizing:border-box; margin:0 28px; padding:36px 0 32px; display:flex; gap:clamp(32px, 5vw, 88px);}
@@ -440,7 +475,7 @@
   /* testo che si apre a tendina: About us (primi due paragrafi visibili) e i capitoli dei progetti (primo paragrafo visibile) */
   /* chiuso: si intravedono le prime due righe del testo che segue, che sfumano nel bianco (come nelle biografie) */
   .fold{position:relative; overflow:hidden; max-height:66px; transition:max-height .6s cubic-bezier(.6,0,.2,1);}
-  .fold::after{content:""; position:absolute; left:0; right:0; bottom:0; height:66px; background:linear-gradient(to bottom, rgba(255,255,255,.1), var(--paper) 92%); pointer-events:none; transition:opacity .35s ease;}
+  .fold::after{content:""; position:absolute; left:0; right:0; bottom:0; height:66px; background:linear-gradient(to bottom, var(--paper-0), var(--paper) 92%); pointer-events:none; transition:opacity .35s ease;}
   .fold.open::after{opacity:0;}
   .fold-in > p:first-child{margin-top:1em;}
   .fold-toggle[hidden]{display:none;}
@@ -453,7 +488,7 @@
   /* biografie: la parte visibile è lunga quanto quella di Antonio Alberti; in fondo una sfumatura */
   .t-text{position:relative;}
   .bio-clip{position:relative; overflow:hidden; transition:max-height .6s cubic-bezier(.6,0,.2,1);}
-  .bio-clip.cut::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3.4em; background:linear-gradient(to bottom, rgba(255,255,255,0), var(--paper)); pointer-events:none; transition:opacity .3s ease;}
+  .bio-clip.cut::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3.4em; background:linear-gradient(to bottom, var(--paper-0), var(--paper)); pointer-events:none; transition:opacity .3s ease;}
   .bio-clip.cut.open::after{opacity:0;}
   .bio-prova{position:absolute; left:0; right:0; top:0; visibility:hidden; pointer-events:none;}
   @media (prefers-reduced-motion:reduce){ .bio-clip{transition:none;} }
@@ -551,17 +586,17 @@
   .cat-link{background:none; font-family:inherit; cursor:pointer;}
   @media (max-width:640px){ .citazione p{font-size:17px;} .art-sub{font-size:15px;} }
   /* fine pagina dei progetti: fascia nera con i contatti e il progetto successivo (copre anche il bordo chiaro, come i Contatti in home) */
-  .p-fine{background:var(--fondo); color:#fff; margin:56px -29px -81px; padding:56px 29px 64px; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:40px 56px; align-items:end;}
-  .p-fine-lab{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#A9A59C; margin-bottom:14px;}
+  .p-fine{background:var(--fondo); color:var(--su-fondo); margin:56px -29px -81px; padding:56px 29px 64px; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:40px 56px; align-items:end;}
+  .p-fine-lab{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--su-fondo-2); margin-bottom:14px;}
   .p-fine-txt{font-size:20px; line-height:1.4; max-width:32ch;}
   .p-fine-link{display:flex; flex-wrap:wrap; gap:10px 28px; margin-top:22px; font-size:15px;}
-  .p-fine-link a{color:#fff; text-decoration:none; border-bottom:1px solid transparent; background-image:linear-gradient(currentColor, currentColor); background-repeat:no-repeat; background-size:0% 1px; background-origin:border-box; background-position:left bottom; transition:background-size .4s var(--ease);}
+  .p-fine-link a{color:var(--su-fondo); text-decoration:none; border-bottom:1px solid transparent; background-image:linear-gradient(currentColor, currentColor); background-repeat:no-repeat; background-size:0% 1px; background-origin:border-box; background-position:left bottom; transition:background-size .4s var(--ease);}
   .p-fine-link a:hover{background-size:100% 1px;}
-  .p-fine-next{justify-self:end; text-align:right; color:#fff; text-decoration:none; display:block;}
+  .p-fine-next{justify-self:end; text-align:right; color:var(--su-fondo); text-decoration:none; display:block;}
   .p-fine-tit{display:block; font-size:clamp(26px, 3.4vw, 40px); font-weight:700; text-transform:uppercase; letter-spacing:-.01em; line-height:1.05;}
   .p-fine-arr{display:inline-block; font-style:normal; transition:transform .25s var(--ease);}
   @media (hover:hover){ .p-fine-next:hover .p-fine-arr{transform:translateX(6px);} }
-  .p-fine :focus-visible{outline-color:#fff;}
+  .p-fine :focus-visible{outline-color:var(--su-fondo);}
   @media (max-width:640px){
     .p-fine{margin:40px -17px -57px; padding:40px 17px 48px; grid-template-columns:minmax(0,1fr);}
     .p-fine-next{justify-self:start; text-align:left;}
@@ -592,31 +627,31 @@
   .contact-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; align-items:center;}
   .contact-logo{aspect-ratio:4/3; display:grid; place-items:center;}
   /* newsletter, sotto i contatti */
-  .nl{margin-top:36px; padding-top:26px; border-top:1px solid rgba(255,255,255,.18); max-width:460px;}
-  .nl-lab{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#A9A59C; margin-bottom:8px;}
-  .nl-txt{font-size:15px; line-height:1.5; color:#fff; margin-bottom:16px; max-width:42ch;}
-  .nl-row{display:flex; gap:16px; align-items:center; border-bottom:1px solid #fff;}
-  .nl-row input{flex:1; min-width:0; background:transparent; border:0; border-radius:0; color:#fff; font:inherit; font-size:18px; padding:8px 0; outline:none;}
-  .nl-row input::placeholder{color:#8F8A80;}
-  .nl-row:focus-within{box-shadow:0 1px 0 #fff;}
-  .nl-row button{flex:none; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#fff; padding:10px 0; transform-origin:right center; transition:transform .25s var(--ease);}
+  .nl{margin-top:36px; padding-top:26px; border-top:1px solid var(--su-fondo-linea); max-width:460px;}
+  .nl-lab{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--su-fondo-2); margin-bottom:8px;}
+  .nl-txt{font-size:15px; line-height:1.5; color:var(--su-fondo); margin-bottom:16px; max-width:42ch;}
+  .nl-row{display:flex; gap:16px; align-items:center; border-bottom:1px solid var(--su-fondo);}
+  .nl-row input{flex:1; min-width:0; background:transparent; border:0; border-radius:0; color:var(--su-fondo); font:inherit; font-size:18px; padding:8px 0; outline:none;}
+  .nl-row input::placeholder{color:var(--su-fondo-3);}
+  .nl-row:focus-within{box-shadow:0 1px 0 var(--su-fondo);}
+  .nl-row button{flex:none; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--su-fondo); padding:10px 0; transform-origin:right center; transition:transform .25s var(--ease);}
   @media (hover:hover){ .nl-row button:hover{transform:scale(1.1);} }
-  .nl-ok{display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:12px; line-height:1.45; color:#C9C4BA; cursor:pointer;}
-  .nl-ok input{appearance:none; -webkit-appearance:none; flex:none; width:14px; height:14px; margin:2px 0 0; border:1px solid #fff; border-radius:0; background:transparent; cursor:pointer;}
-  .nl-ok input:checked{background:#fff; box-shadow:inset 0 0 0 3px var(--fondo);}
-  .nl-ok a{color:#fff; text-decoration:underline; text-underline-offset:2px;}
-  .nl-msg{min-height:1.45em; margin-top:10px; font-size:13px; line-height:1.45; color:#fff;}
+  .nl-ok{display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:12px; line-height:1.45; color:var(--su-fondo-4); cursor:pointer;}
+  .nl-ok input{appearance:none; -webkit-appearance:none; flex:none; width:14px; height:14px; margin:2px 0 0; border:1px solid var(--su-fondo); border-radius:0; background:transparent; cursor:pointer;}
+  .nl-ok input:checked{background:var(--su-fondo); box-shadow:inset 0 0 0 3px var(--fondo);}
+  .nl-ok a{color:var(--su-fondo); text-decoration:underline; text-underline-offset:2px;}
+  .nl-msg{min-height:1.45em; margin-top:10px; font-size:13px; line-height:1.45; color:var(--su-fondo);}
   .nl-sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
-  .contact-logo img{width:70%; height:auto; filter:invert(1) brightness(2);}   /* il logo in bianco */
+  .contact-logo img{width:70%; height:auto; filter:var(--logo-su-fondo);}   /* il logo sulla banda: bianco di giorno, nero di notte */
   /* contatti: nero alto quanto lo schermo sotto l'intestazione, contenuto al centro;
      il nero copre anche il bordo chiaro del riquadro (1px in più ai lati e sotto), così si fonde con le bande */
-  #contatti{background:var(--fondo); color:#fff; margin:0 -29px -1px; padding:0 29px; border-top:none;
+  #contatti{background:var(--fondo); color:var(--su-fondo); margin:0 -29px -1px; padding:0 29px; border-top:none;
     min-height:calc(100vh - var(--hdr-h, 70px)); display:flex; flex-direction:column; justify-content:center;}
   #contatti .psec-pad{padding:48px 0;}
-  #contatti .contacts dt{color:#A9A59C;}
+  #contatti .contacts dt{color:var(--su-fondo-2);}
   #contatti .contacts dd a{border-bottom-color:transparent; background-image:linear-gradient(currentColor, currentColor); background-repeat:no-repeat; background-size:0% 1px; background-origin:border-box; background-position:left bottom; transition:background-size .4s var(--ease);}   /* la sottolineatura si riempie solo passandoci sopra */
   #contatti .contacts dd a:hover{background-size:100% 1px;}
-  #contatti :focus-visible{outline-color:#fff;}
+  #contatti :focus-visible{outline-color:var(--su-fondo);}
   @media (max-width:640px){ #contatti{margin:0 -16px; padding:0 16px;} #contatti .psec-pad{padding:36px 0;} }
   /* schermi grandi: ai lati del riquadro c'è bianco, non nero. Le fasce nere (in alto con IT/EN, in fondo,
      i contatti e la chiusura dei progetti) restano a tutta larghezza come sugli schermi più piccoli */
@@ -668,8 +703,8 @@
 
 
 <div class="frame">
-  <!-- le lingue: in alto a destra, sulla fascia scura sopra il riquadro -->
-  <div class="lang-bar"><span class="lang-switch"></span></div>
+  <!-- le lingue e il pulsante giorno/notte: in alto a destra, sulla fascia sopra il riquadro -->
+  <div class="lang-bar"><button type="button" class="tema-btn" aria-pressed="false"></button><span class="lang-switch"></span></div>
   <!-- intestazione: il logo a sinistra, le sezioni a destra sulla stessa riga; resta ferma mentre si scorre -->
   <header class="top">
     <a class="logo logo-mark" href="#" id="logoLink"><img src="img/pittogramma.png?v=3" alt="OUTFRAME — Home"></a>
@@ -704,7 +739,7 @@
 
 <div class="panel article" id="article" hidden role="dialog" aria-modal="true" aria-labelledby="artTitle">
   <div class="panel-inner">
-    <div class="lang-bar"><span class="lang-switch"></span></div>
+    <div class="lang-bar"><button type="button" class="tema-btn" aria-pressed="false"></button><span class="lang-switch"></span></div>
     <header>
       <a class="logo logo-mark" href="#" id="artLogo"><img src="img/pittogramma.png?v=3" alt="OUTFRAME — Home"></a>
       <span class="center-label" id="artLabel"></span>
@@ -1438,7 +1473,7 @@ const UI = {
         nlGrazie: 'Grazie! Ti abbiamo mandato una mail: confermala per completare l’iscrizione.', nlMail: 'Si è aperta la tua app di posta: invia la mail e ti aggiungiamo alla lista.',
         nlOggetto: 'Iscrizione newsletter', nlCorpo: 'Vorrei iscrivermi alla newsletter di Outframe con questo indirizzo:',
         fineLab: 'Contatti', fineTxt: 'Ti interessano le opere o le stampe, o vuoi collaborare con noi? Scrivici.', fineNext: 'Progetto successivo',
-        works: 'Opere', bio: 'Biografia', sfoglia: 'Sfoglia artisti', prevA: 'Artista precedente', nextA: 'Artista successivo',
+        works: 'Opere', bio: 'Biografia', sfoglia: 'Sfoglia artisti', prevA: 'Artista precedente', nextA: 'Artista successivo', temaNotte: 'Passa alla notte', temaGiorno: 'Passa al giorno',
         cat: 'Il Peso del Cielo — Catalogo della mostra', fan: 'Il Peso del Cielo — Fanzine' },
   en: { close: 'Close', readMore: 'Read more →', browse: 'Browse →', aboutMore: 'Keep reading', aboutLess: 'Show less', scheda: 'technical details', grande: 'open full screen', fotoN: 'Photo',
         bio: 'Biography coming soon.', projText: 'Project text coming soon.',
@@ -1449,7 +1484,7 @@ const UI = {
         nlGrazie: 'Thank you! We have sent you an email: confirm it to complete your subscription.', nlMail: 'Your email app has opened: send the email and we will add you to the list.',
         nlOggetto: 'Newsletter subscription', nlCorpo: 'I would like to subscribe to the Outframe newsletter with this address:',
         fineLab: 'Contact', fineTxt: 'Interested in the works or prints, or want to work with us? Get in touch.', fineNext: 'Next project',
-        works: 'Works', bio: 'Biography', sfoglia: 'Browse artists', prevA: 'Previous artist', nextA: 'Next artist',
+        works: 'Works', bio: 'Biography', sfoglia: 'Browse artists', prevA: 'Previous artist', nextA: 'Next artist', temaNotte: 'Switch to night', temaGiorno: 'Switch to day',
         cat: 'Il Peso del Cielo — Exhibition catalogue', fan: 'Il Peso del Cielo — Fanzine' },
 };
 let LANG = 'it';
@@ -2540,7 +2575,7 @@ function setLang(l) {
   if (l === LANG) return;
   LANG = l;
   try { localStorage.setItem('outframe-lang', l); } catch (e) {}
-  applyLangData(); applyStaticTexts(); renderLangSwitches();
+  applyLangData(); applyStaticTexts(); renderLangSwitches(); renderTemaBtns();
   const y = window.scrollY; renderPage(); window.scrollTo(0, y);
   rerendering = true;
   if (!article.hidden) { const ay = article.scrollTop; aboutOpen ? openAbout() : openArticle(projActive); article.scrollTop = ay; }
@@ -2548,6 +2583,32 @@ function setLang(l) {
   rerendering = false;
 }
 document.addEventListener('click', e => { const b = e.target.closest('.lang-switch button[data-lang]'); if (b) { e.stopPropagation(); setLang(b.dataset.lang); } }, true);
+
+/* ---------- giorno / notte ----------
+   All'inizio il sito segue il telefono o il computer del visitatore (modalità chiara o scura);
+   il cerchio accanto a IT/EN cambia a mano, e la scelta resta salvata nel suo browser. */
+const TEMA_ICONA = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></svg>';
+let temaScelto = null;
+try { const v = localStorage.getItem('outframe-tema'); if (v === 'giorno' || v === 'notte') temaScelto = v; } catch (e) {}
+const scuroSistema = window.matchMedia('(prefers-color-scheme: dark)');
+const temaAttuale = () => document.documentElement.dataset.tema === 'notte' ? 'notte' : 'giorno';
+function renderTemaBtns() {
+  const notte = temaAttuale() === 'notte', lab = t(notte ? 'temaGiorno' : 'temaNotte');
+  document.querySelectorAll('.tema-btn').forEach(b => { if (!b.firstChild) b.innerHTML = TEMA_ICONA; b.setAttribute('aria-pressed', notte); b.setAttribute('aria-label', lab); b.title = lab; });
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = notte ? '#FFFFFF' : '#0d0c0a';   // il colore della barra del browser sul telefono segue la fascia in alto
+}
+function setTema(tm, salva) {
+  const root = document.documentElement;
+  if (!reduceMotion) { root.classList.add('tema-shift'); clearTimeout(setTema.timer); setTema.timer = setTimeout(() => root.classList.remove('tema-shift'), 750); }
+  root.dataset.tema = tm;
+  if (salva) { temaScelto = tm; try { localStorage.setItem('outframe-tema', tm); } catch (e) {} }
+  renderTemaBtns();
+}
+document.addEventListener('click', e => { const b = e.target.closest('.tema-btn'); if (b) { e.stopPropagation(); setTema(temaAttuale() === 'notte' ? 'giorno' : 'notte', true); } }, true);
+scuroSistema.addEventListener('change', e => { if (!temaScelto) setTema(e.matches ? 'notte' : 'giorno', false); });
+if (document.documentElement.dataset.tema !== 'notte' && document.documentElement.dataset.tema !== 'giorno') document.documentElement.dataset.tema = temaScelto || (scuroSistema.matches ? 'notte' : 'giorno');
+renderTemaBtns();
 applyLangData(); applyStaticTexts(); renderLangSwitches();
 
 // avvio: con #progetti, #artisti… nel link si arriva direttamente a quella parte della pagina
