@@ -497,10 +497,20 @@
   .track-wrap{position:relative;}
   .htrack{display:flex; gap:28px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:14px; scrollbar-width:thin; scrollbar-color:var(--line) transparent;}
   .hcard{flex:0 0 auto; width:min(420px, 78vw); scroll-snap-align:start; display:flex; flex-direction:column; gap:10px; text-align:left; cursor:pointer;}
-  .hpic{position:relative; display:block; width:100%; aspect-ratio:4/5; overflow:hidden; background:var(--frame);}
+  .hpic{position:relative; display:block; width:100%; aspect-ratio:4/5; overflow:hidden; background:transparent;}   /* nessun fondo chiaro intorno alle foto */
+  /* le foto che scorrono restano nel loro formato (verticali, quadrate, orizzontali); solo la copertina riempie tutto il riquadro */
   .hpic img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; opacity:0; transition:opacity .4s ease, transform .6s var(--ease);}
   .hpic img.on{opacity:1; transition:opacity .5s ease .35s, transform .6s var(--ease);}   /* prima sparisce la vecchia, poi entra la nuova: mai sovrapposte */
+  .hpic img.cop{object-fit:cover;}
   .hcard:hover .hpic img.on{transform:scale(1.02);}
+  /* la scheda le cui foto iniziano a scorrere (con il mouse quella sotto il cursore, sul telefono quella che si sta guardando)
+     si ingrandisce appena, le altre della fila si rimpiccioliscono un poco. Un po' di spazio intorno alla fila (compensato
+     dai margini negativi) evita che la scheda ingrandita venga tagliata: l'impaginazione non cambia */
+  .htrack{padding:12px 12px 26px; margin:-12px -12px 0; scroll-padding-inline:12px;}
+  .hcard{transition:transform .5s var(--ease);}
+  .htrack.ha-attiva .hcard{transform:scale(.975);}
+  .htrack.ha-attiva .hcard.attiva{transform:scale(1.025);}
+  @media (prefers-reduced-motion:reduce){ .hcard{transition:none;} }
   .hbars{display:flex; gap:3px; height:2px;}
   .hbars i{flex:1; background:var(--line);}
   .hbars i.done{background:var(--ink);}
@@ -534,14 +544,14 @@
   .opera-sch p + p{padding-top:2px;}
   @media (prefers-reduced-motion:reduce){ .opera-sch, .opera-tit i{transition:none;} }
   .article-body .otrack img{position:absolute; inset:0; display:block; width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; object-position:center bottom;}   /* l'opera intera dentro il riquadro, mai tagliata; appoggiata in basso, così il titolo sta subito sotto */
-  /* Art d'Enfer, "Il dialogo con lo spazio": quattro riquadri identici, foto e video interi (senza tagli) */
-  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]){display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; contain:none; min-height:0; columns:auto; align-self:start;}
-  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]) figure{margin:0; height:auto; display:block; aspect-ratio:16/9; background:var(--frame); overflow:hidden; break-inside:auto;}
-  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]) :is(img, video){display:block; width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; object-position:center; background:transparent;}
-  @media (max-width:900px){ #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]){gap:10px;} }
+  /* Art d'Enfer e Art d'Enfer II, "Lo spazio e l'allestimento": quattro riquadri identici, foto e video interi (senza tagli) */
+  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]), #artBody .t-figs:has(video[src*="adf2-spazio"]){display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; contain:none; min-height:0; columns:auto; align-self:start;}
+  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]) figure, #artBody .t-figs:has(video[src*="adf2-spazio"]) figure{margin:0; height:auto; display:block; aspect-ratio:16/9; background:var(--frame); overflow:hidden; break-inside:auto;}
+  #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]) :is(img, video), #artBody .t-figs:has(video[src*="adf2-spazio"]) :is(img, video){display:block; width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; object-position:center; background:transparent;}
+  @media (max-width:900px){ #artBody .t-figs:has(img[src*="denfer-testo-bn/pianoforte"]), #artBody .t-figs:has(video[src*="adf2-spazio"]){gap:10px;} }
   /* Pagine dei progetti su telefono: tutte le foto e i video alla stessa larghezza, verticali e orizzontali (formato intero, nessun taglio) */
   @media (max-width:900px){
-    #artBody.proj-flow .t-figs:not(.giusto):not(:has(img[src*="denfer-testo-bn/pianoforte"])) :is(img, video):not([src*="mappa"]){width:min(75%, 300px); max-width:none; height:auto; max-height:none; object-fit:contain; align-self:flex-start;}
+    #artBody.proj-flow .t-figs:not(.giusto):not(:has(img[src*="denfer-testo-bn/pianoforte"], video[src*="adf2-spazio"])) :is(img, video):not([src*="mappa"]){width:min(75%, 300px); max-width:none; height:auto; max-height:none; object-fit:contain; align-self:flex-start;}
   }
   /* Progetti: un capitolo con più di 4 foto o video li mette tutti in fila, uno accanto all'altro, e la fila scorre di lato (computer e telefono) */
   #artBody.proj-flow .t-figs.stack .stack-in.riga, #artBody.proj-flow .t-figs.riga:not(.stack){position:static; height:auto; max-height:none; display:flex; flex-direction:row; flex-wrap:nowrap; align-items:flex-start; gap:14px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; padding-bottom:12px; scrollbar-width:thin; scrollbar-color:var(--line) transparent;}
@@ -1283,7 +1293,181 @@ Promoter and music partner of the project
 
 Host venue and partner of the project
 ` },
-        foto: ['img/art-denfer-bn/07.jpg?v=2', 'img/art-denfer-bn/01.jpg?v=2', 'img/art-denfer-bn/02.jpg?v=2', 'img/art-denfer-bn/05.jpg?v=2', 'img/art-denfer-bn/06.jpg?v=2', 'img/art-denfer-bn/08.jpg?v=2', 'img/art-denfer-bn/04.jpg?v=2', 'img/art-denfer-bn/09.jpg?v=2', 'img/art-denfer-bn/10.jpg?v=2', 'img/art-denfer-bn/11.jpg?v=2'],
+        foto: ['img/art-denfer-bn/06.jpg?v=2', 'img/art-denfer-bn/01.jpg?v=2', 'img/art-denfer-bn/02.jpg?v=2', 'img/art-denfer-bn/05.jpg?v=2', 'img/art-denfer-bn/07.jpg?v=2', 'img/art-denfer-bn/08.jpg?v=2', 'img/art-denfer-bn/04.jpg?v=2', 'img/art-denfer-bn/09.jpg?v=2', 'img/art-denfer-bn/10.jpg?v=2', 'img/art-denfer-bn/11.jpg?v=2'],
+      },
+      {
+        nome: 'Art d’Enfer II',
+        sottotitolo: 'Le alchimie del colore',   // dal foglio sala
+        copertina: 'img/art-denfer-2/apertura.jpg',   // foto grande in apertura della pagina
+        scheda: [['Luogo', 'Altrove'], ['Spazi', '3 stanze'], ['Artisti', '5 artisti'],
+          ['Linguaggi', 'Pittura e proiezione video'], ['Curatela', 'Pietro Alberti ed Emma Corsini'], ['Promotori', 'Outframe e Nuits d’enfer']],
+        testo: `
+## 01 — IL PROGETTO
+
+*Art d’Enfer II* è la seconda edizione di *Art d’Enfer*, il progetto nato da **Nuits d’enfer**, realtà che dà spazio a giovani DJ con serate dedicate alla musica elettronica e alla nuova scena milanese, creando occasioni di incontro tra pubblico, musicisti e nuovi talenti.
+
+Il progetto ne è l’evoluzione, dalla centralità del suono all’apertura verso altri linguaggi creativi: portare la musica elettronica in un contesto espositivo e mettere in relazione diretta suono, arti visive e performance. L’arte non è lo sfondo della musica e la musica non è una semplice componente dell’evento: entrambe diventano parte dello stesso ambiente e dello stesso linguaggio.
+
+Un progetto costruito attorno al dialogo tra immaginari diversi, generazioni vicine e pratiche artistiche differenti.
+
+---
+
+## 02 — CURATELA E ARTISTI
+
+La curatela è di **Pietro Alberti** per Outframe e di **Emma Corsini**. Questa edizione, dedicata alle alchimie del colore, riunisce cinque artisti tra pittura e proiezione video: ricerche diverse, messe in dialogo nello stesso percorso.
+
+### ARTISTI
+
+**[Boselli](https://www.instagram.com/bosellii/)**
+**[Martina Licalsi](#martina-licalsi)**
+**[Christian Albert](https://www.instagram.com/_christian_albert/)**
+**[Victor Öfvergård](https://www.instagram.com/victorofvergard/)**
+**[Cristina de Pedrajuan](https://www.instagram.com/lacristo______xp/)**
+
+![](img/art-denfer-2/05.jpg?fila)
+![](img/art-denfer-2/07.jpg?fila)
+![](img/art-denfer-2/03.jpg?fila)
+![](img/art-denfer-2/08.jpg?fila)
+
+---
+
+## 03 — LO SPAZIO E L’ALLESTIMENTO
+
+*Art d’Enfer II* torna negli spazi di **Altrove**, il cui carattere grezzo e industriale diventa parte della mostra: tre stanze che accolgono una collettiva di opere dalle saturazioni contrastanti, dedicata alle pratiche visive e al colore. Le palette vivide delle diverse ricerche raccontano universi narrativi differenti nati da una stessa origine: Milano e la sua contemporaneità più autentica.
+
+Il percorso si apre al centro della sala con il dittico di **Boselli** dedicato al mito di Diana e Atteone, *La favola / Le conseguenze dell’amore*: un invito a perdersi in mondi fantastici e un preludio alla notte della trasformazione. Con **Martina Licalsi** foglia d’oro, inchiostri e texture cambiano forma: grazie al transfer a inchiostro su carta, cartone vegetale e legno, immagini d’archivio e frammenti di film arrivano sbiaditi come ricordi, in un ritorno all’infanzia.
+
+La metamorfosi prosegue nell’astrattismo di **Christian Albert**, le cui opere, pensate per una lettura organica, sono distribuite sulla parete come una trilogia. L’estasi del primo incontro e le sue infinite possibilità prendono forma attraverso la stratificazione: il colore si deposita strato su strato, per improvvisazione, come in una sessione jazz. Gli inganni della memoria, della percezione e del sentimento attraversati con Boselli e Licalsi trovano qui una forma sintetica, astratta.
+
+Con **Victor Öfvergård** le forme escono dalla tela: materiali grezzi e sperimentali, rielaborati con il design e la stampa 3D, fanno del colore una questione di materia. Il percorso culmina nell’installazione video di **Cristina de Pedrajuan**, un’esperienza visiva e sonora in cui forme disegnate a mano e animate digitalmente prendono vita in proiezione, recuperando l’immaginario digitale degli esordi.
+
+In chiusura, una doccia di luce al neon in movimento: l’ultima illusione della mostra e il passaggio verso la notte.
+
+![](img/art-denfer-2/03.jpg)
+![](img/art-denfer-2/05.jpg)
+![](video/adf2-spazio-1.mp4)
+![](video/adf2-spazio-2.mp4)
+
+---
+
+## 04 — LA SERATA
+
+Venerdì 13 novembre 2026 la musica di **Nuits d’enfer** ha riempito le stanze di Altrove con tre set, che hanno accompagnato il pubblico tra le opere dall’apertura fino a notte.
+
+Ha aperto **Cesare Chittaro**, DJ italo-francese che si muove tra minimal, electro, techno e downtempo: un suono eclettico e in continua evoluzione, che porta con sé le esperienze vissute tra le scene underground di Milano e Londra. È seguito **Edoardo Lucifero Campolattaro**, in arte Lucifero: cresciuto sull’eredità elettronica di Roma e sull’insegnamento di figure come Marco Trani e Claudio Coccoluto, coltiva una profonda passione per l’elettronica d’avanguardia degli anni Settanta e per la cultura del vinile.
+
+Ha chiuso la serata **Marc Anthony Bowen**, formatosi al Conservatorio Rossini, che porta nell’elettronica le sue radici classiche: nei suoi set le due pratiche si contaminano. Ancora una volta musica e arti visive hanno condiviso lo stesso ambiente, senza gerarchie, come nello spirito con cui il progetto è nato.
+
+---
+
+
+## 05 — TEAM
+
+### NUITS D’ENFER
+
+Realtà promotrice e musicale del progetto
+
+### OUTFRAME
+
+**Pietro Alberti** — Curatela
+**Elia Giatti** — Gestione legale
+**Riccardo Borzacca** — Direzione allestimento
+**Vittorio Franceschi** — Grafica
+
+### EMMA CORSINI
+
+Curatela e Ufficio stampa
+
+### ALTROVE
+
+Spazio ospitante e partner del progetto
+`,
+        en: { sottotitolo: 'The alchemies of colour',
+          scheda: [['Venue', 'Altrove'], ['Spaces', '3 rooms'], ['Artists', '5 artists'],
+          ['Disciplines', 'Painting and video projection'], ['Curation', 'Pietro Alberti and Emma Corsini'], ['Promoters', 'Outframe and Nuits d’enfer']],
+          testo: `
+## 01 — THE PROJECT
+
+*Art d’Enfer II* is the second edition of *Art d’Enfer*, the project that grew out of **Nuits d’enfer**, an organisation that gives space to young DJs through nights dedicated to electronic music and Milan's new music scene, creating opportunities for audiences, musicians and new talent to meet.
+
+The project is the evolution of this path, from a focus on sound to an opening towards other creative languages: bringing electronic music into an exhibition setting and putting sound, visual art and performance in direct dialogue. Art is not a backdrop for the music, and the music is not just one part of the event: both become part of the same environment and the same language.
+
+A project built around the dialogue between different imaginaries, close generations and different artistic practices.
+
+---
+
+## 02 — CURATION AND ARTISTS
+
+The exhibition is curated by **Pietro Alberti** for Outframe and by **Emma Corsini**. This edition, dedicated to the alchemies of colour, brings together five artists working across painting and video projection: different practices placed in dialogue along the same route.
+
+### ARTISTS
+
+**[Boselli](https://www.instagram.com/bosellii/)**
+**[Martina Licalsi](#martina-licalsi)**
+**[Christian Albert](https://www.instagram.com/_christian_albert/)**
+**[Victor Öfvergård](https://www.instagram.com/victorofvergard/)**
+**[Cristina de Pedrajuan](https://www.instagram.com/lacristo______xp/)**
+
+![](img/art-denfer-2/05.jpg?fila)
+![](img/art-denfer-2/07.jpg?fila)
+![](img/art-denfer-2/03.jpg?fila)
+![](img/art-denfer-2/08.jpg?fila)
+
+---
+
+## 03 — THE SPACE AND THE INSTALLATION
+
+*Art d’Enfer II* returns to **Altrove**, whose raw, industrial character becomes part of the exhibition: three rooms hosting a group show of works with contrasting saturations, dedicated to visual practice and colour. The vivid palettes of the different practices tell different stories that share a single origin: Milan and its most authentic present.
+
+The route opens at the centre of the room with **Boselli**'s diptych on the myth of Diana and Actaeon, *La favola / Le conseguenze dell’amore*: an invitation to lose oneself in fantastic worlds and a prelude to a night of transformation. With **Martina Licalsi**, gold leaf, inks and textures change form: through ink transfer on paper, vegetable-fibre board and wood, archival images and film fragments arrive faded like memories, in a return to childhood.
+
+The metamorphosis continues in the abstraction of **Christian Albert**, whose works, conceived to be read as a whole, are arranged on the wall as a trilogy. The ecstasy of a first encounter and its endless possibilities take shape through layering: colour builds up layer upon layer, by improvisation, like a jazz session. The tricks of memory, perception and feeling explored with Boselli and Licalsi take on a concise, abstract form here.
+
+With **Victor Öfvergård**, forms step out of the canvas: raw, experimental materials, reworked through design and 3D printing, turn colour into a question of matter. The route culminates in **Cristina de Pedrajuan**'s video installation, a visual and sound experience in which hand-drawn, digitally animated forms come to life in projection, recalling the digital imagery of the early days.
+
+At the end, a shower of moving neon light: the exhibition's last illusion and the passage into the night.
+
+![](img/art-denfer-2/03.jpg)
+![](img/art-denfer-2/05.jpg)
+![](video/adf2-spazio-1.mp4)
+![](video/adf2-spazio-2.mp4)
+
+---
+
+## 04 — THE NIGHT
+
+On Friday 13 November 2026 the music of **Nuits d’enfer** filled the rooms of Altrove with three sets, accompanying the audience among the works from the opening late into the night.
+
+**Cesare Chittaro** opened the night, an Italian-French DJ who moves between minimal, electro, techno and downtempo: an eclectic, ever-evolving sound shaped by his experience of the underground scenes of Milan and London. He was followed by **Edoardo Lucifero Campolattaro**, aka Lucifero: raised on Rome's electronic heritage and on the teaching of figures such as Marco Trani and Claudio Coccoluto, he has a deep passion for the avant-garde electronic music of the 1970s and for vinyl culture.
+
+**Marc Anthony Bowen** closed the night. Trained at the Conservatorio Rossini, he brings his classical roots into electronic music, and in his sets the two practices blend. Once again music and visual art shared the same space, without hierarchies, in the spirit in which the project was born.
+
+---
+
+
+## 05 — TEAM
+
+### NUITS D’ENFER
+
+Promoter and music partner of the project
+
+### OUTFRAME
+
+**Pietro Alberti** — Curation
+**Elia Giatti** — Legal
+**Riccardo Borzacca** — Installation Director
+**Vittorio Franceschi** — Graphic Design
+
+### EMMA CORSINI
+
+Curation and Press Office
+
+### ALTROVE
+
+Host venue and partner of the project
+` },
+        foto: ['img/art-denfer-2/06.jpg', 'img/art-denfer-2/02.jpg', 'img/art-denfer-2/03.jpg', 'img/art-denfer-2/04.jpg', 'img/art-denfer-2/05.jpg',
+          'img/art-denfer-2/01.jpg', 'img/art-denfer-2/07.jpg', 'img/art-denfer-2/08.jpg', 'img/art-denfer-2/09.jpg'],
       },
     ],
   },
@@ -1540,7 +1724,7 @@ function trackHtml(s, si) {
         ${s.voci.map((v, k) => `
           <button class="hcard" data-sec="${si}" data-i="${k}" style="--d:${k * 900}ms">
             <span class="hpic">
-              <img src="${v.foto[0]}" alt="" class="on" loading="lazy"><img src="${v.foto[0]}" alt="" loading="lazy">
+              <img src="${v.foto[0]}" alt="" class="on cop" loading="lazy"><img src="${v.foto[0]}" alt="" class="cop" loading="lazy">
             </span>
             <span class="hbars">${v.foto.map(() => '<i></i>').join('')}</span>
             <span class="hname">${corsivo(v.nome)}</span>
@@ -1570,12 +1754,29 @@ function renderPage() {
 function stepCard(c) {
   const v = SEZIONI[+c.dataset.sec].voci[+c.dataset.i];
   if (v.foto.length < 2) return;
+  accendi(c);
   c._slide = ((c._slide || 0) + 1) % v.foto.length;
   const imgs = c.querySelectorAll('.hpic img');
   const on = c.querySelector('.hpic img.on'), off = on === imgs[0] ? imgs[1] : imgs[0];
-  off.src = v.foto[c._slide]; off.classList.add('on'); on.classList.remove('on');
+  off.src = v.foto[c._slide]; off.classList.toggle('cop', c._slide === 0); off.classList.add('on'); on.classList.remove('on');
   c.querySelectorAll('.hbars i').forEach((b, k) => b.classList.toggle('done', k <= c._slide));
   new Image().src = v.foto[(c._slide + 1) % v.foto.length];
+}
+// la scheda che si sta guardando (le sue foto scorrono) si ingrandisce appena, le altre della fila si rimpiccioliscono
+function accendi(c) {
+  if (c.classList.contains('attiva')) return;
+  c.classList.add('attiva');
+  const tr = c.closest('.htrack'); if (tr) tr.classList.add('ha-attiva');
+}
+function spegni(c) {
+  c.classList.remove('attiva');
+  const tr = c.closest('.htrack');
+  if (tr && !tr.querySelector('.hcard.attiva')) tr.classList.remove('ha-attiva');
+}
+// con il mouse: quando il cursore lascia la scheda, tutte tornano uguali
+if (!window.matchMedia('(hover: none)').matches) {
+  page.addEventListener('mouseover', e => { const c = e.target.closest('.hcard'); page.querySelectorAll('.hcard.attiva').forEach(x => { if (x !== c) spegni(x); }); });
+  page.addEventListener('mouseleave', () => page.querySelectorAll('.hcard.attiva').forEach(spegni));
 }
 if (!reduceMotion) setInterval(() => {
   // con il mouse: scorrono solo le foto della scheda sotto il cursore
@@ -1585,7 +1786,7 @@ if (!reduceMotion) setInterval(() => {
 // su telefono e tablet (niente mouse): scorrono le foto delle schede che si vedono sullo schermo
 const schedeVisibili = new Set();
 const schedeIO = window.matchMedia('(hover: none)').matches && 'IntersectionObserver' in window && !reduceMotion
-  ? new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? schedeVisibili.add(e.target) : schedeVisibili.delete(e.target)), { threshold: .6 })
+  ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) schedeVisibili.add(e.target); else { schedeVisibili.delete(e.target); spegni(e.target); } }), { threshold: .6 })
   : null;
 function osservaSchede() {
   if (!schedeIO) return;
@@ -1866,8 +2067,10 @@ function fineProgetto(s, p) {
 /* ---------- pagina dedicata (testo completo) ---------- */
 const article = document.getElementById('article');
 // i titoli dei progetti vanno sempre in corsivo, anche fuori dai testi (schede, titoli delle pagine, cataloghi)
-const TITOLI_CORSIVI = ['Il Peso del Cielo', 'Art d’Enfer'];
-const corsivo = x => TITOLI_CORSIVI.reduce((h, n) => h.split(esc(n)).join(`<em>${esc(n)}</em>`), esc(x));
+const TITOLI_CORSIVI = ['Il Peso del Cielo', 'Art d’Enfer II', 'Art d’Enfer'];
+// i titoli più lunghi prima, così «Art d’Enfer II» va tutto in corsivo e non solo «Art d’Enfer»
+const TITOLI_RE = new RegExp(TITOLI_CORSIVI.map(n => esc(n).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length).join('|'), 'g');
+const corsivo = x => esc(x).replace(TITOLI_RE, m => `<em>${m}</em>`);
 const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const SOLO_COMPUTER = ['denfer-testo-bn/10'];          // foto che sul telefono non si vedono
 function misure(m) {
@@ -1875,22 +2078,23 @@ function misure(m) {
   if (m.videoWidth) return [m.videoWidth, m.videoHeight];
   return m._pd || null;                                    // video: misure prese dall'immagine di anteprima
 }
-// progetti: se un capitolo ha più di 4 foto o video, stanno tutti in una fila che scorre di lato (computer e telefono)
+// progetti: se un capitolo ha più di 4 foto o video, stanno tutti in una fila che scorre di lato (computer e telefono);
+// "?fila" alla fine del percorso di una foto mette in fila anche un capitolo con meno foto (es. Art d'Enfer II, Curatela e artisti)
 function rigaFoto(root) {
   root.querySelectorAll('.t-figs').forEach((tf, k) => {
     const box = tf.querySelector('.stack-in') || tf;
-    if (box.querySelectorAll(':scope > figure').length <= 4) return;
+    if (box.querySelectorAll(':scope > figure').length <= 4 && !box.querySelector('[src*="?fila"]')) return;
     box.classList.add('riga'); box.id = 'riga-' + k;
   });
 }
 // pagine dei progetti: le foto di ogni capitolo vanno in righe che occupano tutta la larghezza,
 // con la stessa altezza dentro la riga (1, 2, 3 o 4 per riga, si sceglie la divisione più equilibrata);
 // una sola foto verticale (es. la mappa) va accanto al testo; restano com'erano la fila che scorre (più di 4 foto)
-// e i quattro riquadri di "Lo spazio" in Art d'Enfer
+// e i quattro riquadri di "Lo spazio" in Art d'Enfer e Art d'Enfer II
 function righeFoto(root) {
   root.querySelectorAll('.t-figs figure').forEach(f => f.classList.toggle('no-phone', SOLO_COMPUTER.some(k => f.querySelector(`[src*="${k}"]`))));
   root.querySelectorAll('.t-figs').forEach(tf => {
-    if (tf.classList.contains('riga') || tf.querySelector('.riga') || tf.querySelector('img[src*="denfer-testo-bn/pianoforte"]')) return;
+    if (tf.classList.contains('riga') || tf.querySelector('.riga') || tf.querySelector('img[src*="denfer-testo-bn/pianoforte"]') || tf.querySelector('video[src*="adf2-spazio"]')) return;
     if (!tf.classList.contains('giusto')) {
       const box = tf.querySelector('.stack-in');
       if (box) { tf.append(...box.children); box.remove(); tf.classList.remove('stack'); }
